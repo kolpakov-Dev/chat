@@ -1,0 +1,118 @@
+.authForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: $color-dark;
+    padding: 24px 46px 50px 46px;
+    border-radius: 24px;
+    box-shadow: 0px 0 10px rgba(255, 255, 255, 0.3);
+    width: 450px;
+    margin: 0 auto;
+    position: relative;
+    color: $color-light;
+    z-index: 2;
+
+    h2 {
+        color: $color-light;
+        font-size: $text-size-header;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+    }
+
+    .socials {
+        display: flex;
+        margin-top: $margin-top-def;
+        align-items: center;
+        justify-content: space-between;
+        width: 115px;
+
+        .social_item {
+            padding: 10px;
+            border: 1px solid white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: $transition-def;
+
+            &:hover {
+                background-color: $color-light;
+                filter: drop-shadow(1px 4px 10px rgba(255, 255, 255, 0.5));
+            }
+        }
+    }
+
+    p.tempText {
+        font-weight: 600;
+        font-size: $text-size-medium;
+        margin-top: $margin-top-def;
+    }
+
+    .inputItem {
+        width: 70%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $padding-small;
+        border-radius: $border-radius-small;
+        background-color: $color-light;
+        margin-top: $margin-top-def;
+        transition: $transition-def;
+
+        input {
+            outline: none;
+            border: none;
+            padding: $padding-small;
+            font-size: $text-size-medium;
+            font-weight: 600;
+            width: 85%;
+
+        }
+
+        &:focus-within {
+            filter: drop-shadow(1px 4px 10px rgba(255, 255, 255, 0.5));
+        }
+
+        svg {
+            width: 25px;
+            height: 25px;
+            color: $color-dark;
+        }
+    }
+
+    .btnAuth {
+        width: 40%;
+        margin-top: $margin-top-def;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: $transition-def;
+
+        &:hover {
+            filter: drop-shadow(1px 4px 10px rgba(255, 255, 255, 0.5));
+            border: 1px solid $color-light;
+            color: $color-light;
+            background: transparent;
+        }
+    }
+
+    .link {
+        font-weight: 400;
+        margin-top: $margin-top-def;
+        font-size: $text-size-small;
+        cursor: pointer;
+        opacity: .5;
+        transition: $transition-def;
+    }
+
+    .link:hover {
+        opacity: 1;
+    }
+
+
+}

@@ -1,31 +1,5 @@
-body,
-div,
-p,
-span,
-ul,
-li,
-a,
-h1,
-h2,
-h3,
-h4 {
-    margin: 0;
-    padding: 0;
-    text-decoration: none;
-    list-style-type: none;
-    font-family: Poppins, sans-serif;
-}
-
 @import "_vars";
 @import "_defStyles";
-@import "auth/_auth";
-
-.content,
-#root,
-body {
-    width: 100%;
-    height: 100%;
-}
 
 .AuthPage {
     width: 100%;
@@ -51,3 +25,7 @@ body {
         transform: scale(1.1);
     }
 }
+
+@import "_preloader";
+@import "auth/_auth";
+@import "chat/_chat";

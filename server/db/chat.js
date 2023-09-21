@@ -1,4 +1,4 @@
-import { db } from "../firebase.setup.js";
+import { auth, db } from "../firebase.setup.js";
 import {
   collection,
   addDoc,
@@ -11,41 +11,75 @@ import {
 } from "firebase/firestore";
 
 export const createChat = async (req, res) => {
-  const { title, userUID } = req.body;
-  try {
-    const docRef = await addDoc(collection(db, "Chats"), {
-      title: title,
-      owner: userUID,
-      users: [userUID],
-      messages: [],
-    });
+  const { title, userUID, friends } = req.body;
+  const messages = [];
+  var date = getDate();
 
-    return res
-      .status(200)
-      .json(JSON.stringify({ title, owner: userUID, users: [userUID] }));
-  } catch (e) {
-    return res.status(500).json(e.message);
+  messages.push({
+    text: "Chat created.",
+    date: date,
+    user: userUID,
+    type: "info",
+  });
+  if (friends.length > 1) {
+    messages.push({
+      text: "Chat owner add new user.",
+      date: date,
+      user: userUID,
+      type: "info",
+    });
   }
+  const usersID = friends.map((elem) => {
+    return elem.id;
+  });
+  addDoc(collection(db, "Chats"), {
+    title: title,
+    owner: userUID,
+    users: usersID,
+    usersData: friends,
+    messages: messages,
+  })
+    .then((snap) => {
+      return res.status(200).json(
+        JSON.stringify({
+          id: snap.id,
+          title,
+          owner: userUID,
+          users: usersID,
+          usersData: friends,
+          messages: messages,
+        })
+      );
+    })
+    .catch((error) => {
+      return res.status(500).json(error.code);
+    });
 };
 export const fetchChats = async (req, res) => {
-  const { userUID } = req.body;
+  const userUID = auth.currentUser.uid;
+  console.log(userUID);
   try {
     const q = query(
       collection(db, "Chats"),
       where("users", "array-contains", userUID)
     );
-    const querySnapshot = await getDocs(q);
-    let result = [];
-    querySnapshot.forEach((doc) => {
-      result.push(doc.data(), doc.id);
-    });
-    return res.status(200).json(JSON.stringify(result));
+    await getDocs(q)
+      .then((querySnapshot) => {
+        let result = [];
+        querySnapshot.forEach((doc) => {
+          result.push({ data: doc.data(), id: doc.id });
+        });
+        return res.status(200).json(JSON.stringify(result));
+      })
+      .catch((error) => {
+        return res.status(500).json(error.code);
+      });
   } catch (error) {
     return res.status(500).json(error.code);
   }
 };
 export const sendMessage = async (req, res) => {
-  const { userUID, message, chatID } = req.body;
+  const { userUID, message, chatID, type } = req.body;
   var datetime = getDate();
   try {
     const docRef = doc(db, "Chats", chatID);
@@ -53,17 +87,29 @@ export const sendMessage = async (req, res) => {
     await updateDoc(docRef, {
       messages: [
         ...docSnap.data().messages,
-        { text: message, date: datetime, user: userUID },
+        { text: message, date: datetime, user: userUID, type: type },
       ],
     })
       .then(async () => {
         const ndSnap = await getDoc(docRef);
-        return res.status(200).json(JSON.stringify(ndSnap.data(), ndSnap.id));
+        return res.status(200).json(
+          JSON.stringify({
+            message: {
+              text: message,
+              date: datetime,
+              user: userUID,
+              type: type,
+            },
+            id: chatID,
+          })
+        );
       })
       .catch((error) => {
+        console.log(error.code);
         return res.status(500).json(error.code);
       });
   } catch (error) {
+    console.log(error.code);
     return res.status(500).json(JSON.stringify(error));
   }
 };
@@ -90,8 +136,35 @@ export const deleteMessage = async (req, res) => {
   }
 };
 
+export const fetchUsers = async (req, res) => {
+  const userUID = auth.currentUser.uid;
+  console.log(userUID);
+  try {
+    const q = query(collection(db, "Users"), where("id", "!=", userUID));
+    await getDocs(q)
+      .then((querySnapshot) => {
+        let result = [];
+        querySnapshot.forEach((doc) => {
+          result.push({
+            id: doc.data().id,
+            name: doc.data().name,
+            image: doc.data().image,
+          });
+        });
+        return res.status(200).json(JSON.stringify(result));
+      })
+      .catch((error) => {
+        return res.status(500).json(error.code);
+      });
+  } catch (error) {
+    return res.status(500).json(error.code);
+  }
+};
+
 const getDate = () => {
   const currentdate = new Date();
+  const minutes = currentdate.getMinutes();
+  const resMin = minutes > 9 ? minutes : "0" + minutes;
   return (
     currentdate.getDate() +
     "." +
@@ -101,8 +174,6 @@ const getDate = () => {
     " " +
     currentdate.getHours() +
     ":" +
-    currentdate.getMinutes() +
-    ":" +
-    currentdate.getSeconds()
+    resMin
   );
 };
